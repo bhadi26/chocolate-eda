@@ -1,0 +1,118 @@
+---
+title: "Chocolate Flavored Exploratory Data Analysis"
+author: "Rebecca Hadi"
+date: "February 3rd, 2018"
+output: html_notebook
+---
+
+As a chocolate lover, when I saw this chocolate related dataset on Kaggle, I couldn't resist the temptation to play around and see what I could learn. This notebook will walkthrough my typical steps of exploring a new data set.  For reference, the data I'm working with can be found at https://www.kaggle.com/rtatman/chocolate-bar-ratings/data. 
+
+
+I've loaded the packages ggplot2, dplyr, and tidyr (code not shown).
+```{r, message=FALSE, warning=FALSE, include = FALSE}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+```
+
+
+First, I will load the data. 
+```{r, message=FALSE,warning=FALSE}
+chocolate <- read.csv("/Users/bt0x/Downloads/flavors_of_cacao.csv")
+```
+
+Next, I want to look at the data itself, the structure/format, and summary values. 
+
+```{r, message = FALSE, warning = FALSE}
+head(chocolate)
+
+str(chocolate)
+
+summary(chocolate)
+
+```
+
+It's interesting that the Cocoa percent is stored as a factor opposed to a numeric value. Let's create another column that has the data stored as numeric. 
+
+
+```{r, message = FALSE, warning = FALSE}
+chocolate$Cocoa.Percent.Numeric <-  chocolate$Cocoa.Percent %>% 
+                                    as.character(.) %>%  #convert to character b/c stored as factor
+                                    gsub("%", "", .) %>% #Remove percent
+                                    as.numeric(.) #Convert to numeric
+                                  
+```
+
+
+
+Next, I want to look at the relationship between some of the variables.  First, I'm interested in the relationship between cocoa percentage and rating. 
+
+
+
+### What's the relationship between rating and cocoa percent?
+
+```{r, message = FALSE, warning = FALSE}
+ggplot(data = chocolate, aes(x = Cocoa.Percent.Numeric, y = Rating)) + 
+       geom_point() + 
+       theme_classic() + 
+       ggtitle("Rating vs. Cocoa Percent") 
+```
+
+Looking at the plot, there doesn't appear to be a strong relationship between rating and cocoa percent. We could fit a linear model to validate this.  At around 70% cocoa, which has several data points, there is a wide distribution of ratings between 1-5.  
+
+
+```{r, message = FALSE, warning = FALSE}
+chocolate_model <- lm(Rating ~ Cocoa.Percent.Numeric, data = chocolate)
+summary(chocolate_model)
+
+```
+
+This isn't the most intitutive coefficient to interpret because we can't have a cocoa percent of zero (maybe that's possible somewhere, but not in this data set.) Let's try it again and rescale the cocoa percent to centered around the mean. 
+
+
+```{r, message = FALSE, warning = FALSE}
+#Center and scale model by mean and standard deviation respectively
+cocoa.rating.z <- (chocolate$Cocoa.Percent.Numeric - mean(chocolate$Cocoa.Percent.Numeric)) / sd(chocolate$Cocoa.Percent.Numeric) 
+  
+#Fit Model with centered variable
+chocolate_model.z <- lm(Rating ~ cocoa.rating.z, data = chocolate)
+
+#Show model 
+summary(chocolate_model.z)
+
+```
+
+For the mean cocoa percentage `r round(mean(chocolate$Cocoa.Percent.Numeric),2)`$\%$, we predict the rating to be 3.19. The coefficient of the cenetered cocoa rating is statistically significant. For every 1 standard deviation difference in cocoa rating (which is `r sd(chocolate$Cocoa.Percent.Numeric)`), we predict the rating to decrease -0.08.  This is not a large effect size and we see that the $r^2$ is very low at 0.027, indicating that the model does not do a great job of explaining the variation in our data set. 
+
+
+Now that we've seen the data, it makes more sense why the cocoa rating was scored as a factor. I'm curious to see what the most common percentage of cocoa. 
+
+
+```{r, message = FALSE, warning = FALSE}
+ggplot(data = chocolate, aes(x = Cocoa.Percent)) + 
+      geom_bar() + 
+      theme_classic() + 
+      ggtitle("Distribution of Cocoa Percent") + 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+      labs (x = "Cocoa Percent", y = "Count")
+
+```
+
+
+Wow! By far, 70% cocoa is the most common in this data set. 
+
+There is a lot more we can dig into with this data set (e.g. do any countries produce higher rated chocolate? Is the distribution of cocoa percent similar across all countries?).  
+
+For now, I've learned that in this data set
+
+1. 70% cocoa is the most common chocolate 
+2. There isn't a strong relationship between cocoa percent and rating.  
+
+
+
+
+
+
+
+
