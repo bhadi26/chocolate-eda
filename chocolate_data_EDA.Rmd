@@ -2,10 +2,10 @@
 title: "Chocolate Flavored Exploratory Data Analysis"
 author: "Rebecca Hadi"
 date: "February 3rd, 2018"
-output: html_notebook
+output: html_document
 ---
 
-As a chocolate lover, when I saw this chocolate related dataset on Kaggle, I couldn't resist the temptation to play around and see what I could learn. This notebook will walkthrough my typical steps of exploring a new data set.  For reference, the data I'm working with can be found at https://www.kaggle.com/rtatman/chocolate-bar-ratings/data. 
+As a chocolate lover, when I saw this chocolate related data set on Kaggle, I couldn't resist the temptation to play around and see what I could learn. This notebook will walk through my typical steps of exploring a new data set.  For reference, the data I'm working with can be found at https://www.kaggle.com/rtatman/chocolate-bar-ratings/data. 
 
 
 I've loaded the packages ggplot2, dplyr, and tidyr (code not shown).
@@ -18,6 +18,7 @@ library(dplyr)
 
 
 First, I will load the data. 
+
 ```{r, message=FALSE,warning=FALSE}
 chocolate <- read.csv("/Users/bt0x/Downloads/flavors_of_cacao.csv")
 ```
@@ -68,7 +69,7 @@ summary(chocolate_model)
 
 ```
 
-This isn't the most intitutive coefficient to interpret because we can't have a cocoa percent of zero (maybe that's possible somewhere, but not in this data set.) Let's try it again and rescale the cocoa percent to centered around the mean. 
+This isn't the most intuitive coefficient to interpret because we can't have a cocoa percent of zero (maybe that's possible somewhere, but not in this data set.) Let's try it again and re-scale the cocoa percent to centered around the mean. 
 
 
 ```{r, message = FALSE, warning = FALSE}
@@ -83,14 +84,14 @@ summary(chocolate_model.z)
 
 ```
 
-For the mean cocoa percentage `r round(mean(chocolate$Cocoa.Percent.Numeric),2)`$\%$, we predict the rating to be 3.19. The coefficient of the cenetered cocoa rating is statistically significant. For every 1 standard deviation difference in cocoa rating (which is `r sd(chocolate$Cocoa.Percent.Numeric)`), we predict the rating to decrease -0.08.  This is not a large effect size and we see that the $r^2$ is very low at 0.027, indicating that the model does not do a great job of explaining the variation in our data set. 
+For the mean cocoa percentage `r round(mean(chocolate$Cocoa.Percent.Numeric),2)`$\%$, we predict the rating to be 3.19. The coefficient of the centered cocoa rating is statistically significant. For every 1 standard deviation difference in cocoa rating (which is `r sd(chocolate$Cocoa.Percent.Numeric)`), we predict the rating to decrease -0.08.  This is not a large effect size and we see that the $r^2$ is very low at 0.027, indicating that the model does not do a great job of explaining the variation in our data set. 
 
 
 Now that we've seen the data, it makes more sense why the cocoa rating was scored as a factor. I'm curious to see what the most common percentage of cocoa. 
 
 
 ```{r, message = FALSE, warning = FALSE}
-ggplot(data = chocolate, aes(x = Cocoa.Percent)) + 
+ggplot(data = chocolate, aes(x = as.factor(Cocoa.Percent.Numeric))) + 
       geom_bar() + 
       theme_classic() + 
       ggtitle("Distribution of Cocoa Percent") + 
@@ -106,7 +107,7 @@ There is a lot more we can dig into with this data set (e.g. do any countries pr
 
 For now, I've learned that in this data set
 
-1. 70% cocoa is the most common chocolate 
+1. 70% cocoa is the most common chocolate. 
 2. There isn't a strong relationship between cocoa percent and rating.  
 
 
